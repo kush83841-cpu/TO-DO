@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>✅ ToDo — Get things done</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script>
+        // Apply the saved theme before the page paints (no flash)
+        try {
+            var saved = localStorage.getItem("todo-theme");
+            if (saved === "light" || saved === "dark") {
+                document.documentElement.setAttribute("data-theme", saved);
+            }
+        } catch (e) { }
+    </script>
+</head>
+
+<body>
+    <div class="bg-glow"></div>
+
+    <main class="wrap">
+        <header class="hero">
+            <div>
+                <h1>✅ ToDo</h1>
+                <p class="tagline">Small tasks. Big wins. One day at a time.</p>
+            </div>
+            <div class="header-actions">
+                <div class="menu-wrap">
+                    <button class="menu-btn" id="menuBtn" type="button" title="More options">⋮</button>
+                    <div class="menu-dropdown" id="menuDropdown">
+                        <a href="{{ url_for('index') }}">✅ All Tasks</a>
+                        <a href="{{ url_for('history') }}">📜 History</a>
+                        <a href="{{ url_for('due') }}">⏰ Due Tasks{% if due_count %} ({{ due_count }}){% endif %}</a>
+                    </div>
+                </div>
+                <button class="theme-btn" id="themeBtn" type="button" title="Switch theme">🌙</button>
+            </div>
+        </header>
+
+        <form class="add-form card" action="{{ url_for('add_task') }}" method="post">
+            <input type="text" name="title" placeholder="What needs doing? ✍️" required autofocus />
+            <input type="date" id="dueDate" name="due_date" title="Due date (auto-filled with today)" />
+            <input type="time" id="dueTime" name="due_time" title="Due time (auto-filled with now)" />
+            <button type="submit">➕ Add task</button>
+        </form>
+
+        <div class="search-row" style="display:flex;gap:10px;align-items:stretch;margin-bottom:14px;flex-wrap:wrap;">
+            <form class="search-form card" style="margin-bottom:0;flex:1 1 260px;flex-wrap:wrap;"
+                action="{{ url_for('index') }}" method="get">
+                <input type="text" name="q" value="{{ q }}" placeholder="🔍 Search tasks by name..." />
+                <input type="date" name="d" value="{{ d }}" title="Pick a due date to search records"
+                    style="flex:1 1 140px;" />
+                <button type="submit">Search</button>
+                {% if q or d %}<a class="search-reset" href="{{ url_for('index') }}">Clear</a>{% endif %}
+            </form>
+        </div>
+        {% if d %}
+        <p style="color:var(--muted);font-size:0.9rem;margin:-4px 0 14px;">📅 Showing tasks due on {{ d }} — <a
+                href="{{ url_for('index') }}">Show all</a></p>
+        {% endif %}
+
+        {% if done_count %}
+        <form action="{{ url_for('clear_completed') }}" method="post" class="clear-form"
+            onsubmit="return confirm('Delete all completed tasks?')">
+            <button type="submit">🧹 Clear completed</button>
+        </form>
+        {% endif %}
+
+        {% if tasks %}
+        <ul class="task-list">
+            {% for t in tasks %}
+            <li class="task card {% if t.done %}done{% endif %}">
+                <form action="{{ url_for('toggle_task', task_id=t.id) }}" method="post">
+                    <button type="submit" class="check" title="Mark done / undone">{% if t.done %}✔{% else %}○{% endif
+                        %}</button>
+                </form>
+                <div class="task-text">
+                    <span class="title">{{ t.title }}</span>
+                    {% if t.due_date %}
+                    {% if not t.done and t.due_date < today %} <span class="badge overdue">⚠️ Overdue · {{ t.due_date
+                        }}{% if t.due_time %} · {{ t.due_time }}{% endif %}</span>
+                        {% elif not t.done and t.due_date == today %}
+                        <span class="badge due-today">⏰ Due today{% if t.due_time %} · {{ t.due_time }}{% endif
+                            %}</span>
+                        {% else %}
+                        <span class="badge">📅 {{ t.due_date }}{% if t.due_time %} · {{ t.due_time }}{% endif %}</span>
+                        {% endif %}
+                        {% endif %}
+                </div>
+                <a class="edit" href="{{ url_for('edit_task', task_id=t.id) }}" title="Edit task">✏️</a>
+                <form action="{{ url_for('delete_task', task_id=t.id) }}" method="post"
+                    onsubmit="return confirm('Delete this task?')">
+                    <button type="submit" class="del" title="Delete task">🗑️</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty card">Nothing here yet. Add your first task above 👆</p>
+        {% endif %}
+
+        <footer>
+            <p>Made with 💜 while learning Flask</p>
+        </footer>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

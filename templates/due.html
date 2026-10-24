@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⏰ Due Tasks — ToDo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script>
+        // Apply the saved theme before the page paints (no flash)
+        try {
+            var saved = localStorage.getItem("todo-theme");
+            if (saved === "light" || saved === "dark") {
+                document.documentElement.setAttribute("data-theme", saved);
+            }
+        } catch (e) { }
+    </script>
+</head>
+
+<body>
+    <div class="bg-glow"></div>
+
+    <main class="wrap">
+        <header class="hero">
+            <div>
+                <h1>⏰ Due Tasks</h1>
+                <p class="tagline">Pending tasks due today or overdue. Search by name or pick a date.</p>
+            </div>
+            <div class="header-actions">
+                <div class="menu-wrap">
+                    <button class="menu-btn" id="menuBtn" type="button" title="More options">⋮</button>
+                    <div class="menu-dropdown" id="menuDropdown">
+                        <a href="{{ url_for('index') }}">✅ All Tasks</a>
+                        <a href="{{ url_for('history') }}">📜 History</a>
+                        <a href="{{ url_for('due') }}">⏰ Due Tasks{% if due_count %} ({{ due_count }}){% endif %}</a>
+                    </div>
+                </div>
+                <button class="theme-btn" id="themeBtn" type="button" title="Switch theme">🌙</button>
+            </div>
+        </header>
+
+        <form class="search-form card" action="{{ url_for('due') }}" method="get">
+            <input type="text" name="q" value="{{ q }}" placeholder="🔍 Search by task name..." />
+            <input type="date" name="d" value="{{ d }}" title="Pick a due date" />
+            <button type="submit">Search</button>
+            {% if q or d %}<a class="search-reset" href="{{ url_for('due') }}">Clear</a>{% endif %}
+        </form>
+
+        <p class="history-count">
+            {% if tasks %}{{ tasks|length }} due task{{ 's' if tasks|length != 1 }}{% if q %} matching "{{ q }}"{% endif
+            %}{% if d %} due on {{ d }}{% endif %}{% else %}No due tasks{% if q %} matching "{{ q }}"{% endif %}{% if d
+            %} due on {{ d }}{% endif %}{% endif %}
+        </p>
+
+        {% if tasks %}
+        <ul class="task-list">
+            {% for t in tasks %}
+            <li class="task card">
+                <form action="{{ url_for('toggle_task', task_id=t.id) }}" method="post">
+                    <button type="submit" class="check" title="Mark done">○</button>
+                </form>
+                <div class="task-text">
+                    <span class="title">{{ t.title }}</span>
+                    {% if t.due_date %}
+                    {% if t.due_date < today %} <span class="badge overdue">⚠️ Overdue · {{ t.due_date }}{% if
+                        t.due_time %} · {{ t.due_time }}{% endif %}</span>
+                        {% elif t.due_date == today %}
+                        <span class="badge due-today">⏰ Due today{% if t.due_time %} · {{ t.due_time }}{% endif
+                            %}</span>
+                        {% else %}
+                        <span class="badge">📅 {{ t.due_date }}{% if t.due_time %} · {{ t.due_time }}{% endif %}</span>
+                        {% endif %}
+                        {% endif %}
+                </div>
+                <a class="edit" href="{{ url_for('edit_task', task_id=t.id) }}" title="Edit task">✏️</a>
+                <form action="{{ url_for('delete_task', task_id=t.id) }}" method="post"
+                    onsubmit="return confirm('Delete this task?')">
+                    <button type="submit" class="del" title="Delete task">🗑️</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty card">No due tasks. Relax — nothing is overdue 🎉</p>
+        {% endif %}
+
+        <p class="back-link"><a href="{{ url_for('index') }}">← Back to tasks</a></p>
+
+        <footer>
+            <p>Made with 💜 while learning Flask</p>
+        </footer>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
