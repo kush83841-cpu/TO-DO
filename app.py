@@ -101,6 +101,12 @@ def due_count(db):
 # ---------- pages ----------
 
 
+@app.route("/sw.js")
+def service_worker():
+    """Serve the service worker from the root so it can control the whole app."""
+    return app.send_static_file("sw.js")
+
+
 @app.route("/")
 def index():
     db = get_db()

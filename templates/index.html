@@ -5,6 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>✅ ToDo — Get things done</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+    <meta name="theme-color" content="#8b5cf6" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <script>
         // Apply the saved theme before the page paints (no flash)
@@ -107,6 +109,12 @@
     </main>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Register the service worker so the app is installable (PWA)
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    </script>
 </body>
 
 </html>
