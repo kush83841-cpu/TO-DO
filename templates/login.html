@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔐 Login — ToDo</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+    <meta name="theme-color" content="#8b5cf6" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script>
+        // Apply the saved theme before the page paints (no flash)
+        try {
+            var saved = localStorage.getItem("todo-theme");
+            if (saved === "light" || saved === "dark") {
+                document.documentElement.setAttribute("data-theme", saved);
+            }
+        } catch (e) { }
+    </script>
+    <style>
+        /* Login-only bits: same look as the rest of the app */
+        .auth-form {
+            display: grid;
+            gap: 12px;
+            padding: 22px;
+        }
+
+        .auth-form input[type="text"],
+        .auth-form input[type="password"] {
+            width: 100%;
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            outline: none;
+        }
+
+        .auth-form input[type="text"]:focus,
+        .auth-form input[type="password"]:focus {
+            border-color: var(--accent);
+        }
+
+        .auth-form button {
+            background: var(--accent-grad);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .auth-form button:hover {
+            opacity: 0.9;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .remember input {
+            accent-color: var(--accent);
+        }
+
+        .error {
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.5);
+            color: #f87171;
+            border-radius: 12px;
+            padding: 11px 14px;
+            margin: 0;
+        }
+
+        .auth-link {
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .auth-link a {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-link a:hover {
+            color: var(--accent2);
+        }
+
+        .auth-wrap {
+            max-width: 420px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-glow"></div>
+
+    <main class="wrap auth-wrap">
+        <header class="hero">
+            <div>
+                <h1>✅ ToDo</h1>
+                <p class="tagline">Small tasks. Big wins. One day at a time.</p>
+            </div>
+            <button class="theme-btn" id="themeBtn" type="button" title="Switch theme">🌙</button>
+        </header>
+
+        <form class="card auth-form" action="{{ url_for('login') }}" method="post">
+            <h2 style="margin:0;">🔐 Welcome back</h2>
+            {% if error %}<p class="error">⚠️ {{ error }}</p>{% endif %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            <input type="text" name="username" placeholder="Username" required autofocus />
+            <input type="password" name="password" placeholder="Password" required />
+            <button type="submit">Login ➜</button>
+            <p class="auth-link">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+        </form>
+
+        <footer>
+            <p>Made with 💜 while learning Flask</p>
+        </footer>
+    </main>
+
+    <script>
+        // Theme toggle (same saved theme as the main app)
+        (function () {
+            var btn = document.getElementById("themeBtn");
+            function paint() {
+                btn.textContent = document.documentElement.getAttribute("data-theme") === "light" ? "☀️" : "🌙";
+            }
+            btn.addEventListener("click", function () {
+                var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+                document.documentElement.setAttribute("data-theme", next);
+                try { localStorage.setItem("todo-theme", next); } catch (e) { }
+                paint();
+            });
+            paint();
+        })();
+        // Register the service worker so the app stays installable (PWA)
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    </script>
+</body>
+
+</html>

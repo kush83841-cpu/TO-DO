@@ -24,7 +24,8 @@
         <header class="hero">
             <div>
                 <h1>⏰ Due Tasks</h1>
-                <p class="tagline">Pending tasks due today or overdue. Search by name or pick a date.</p>
+                <p class="tagline">All your pending work, including overdue. Search by name or pick a date.</p>
+                {% if username %}<p class="tagline">👋 Hi, {{ username }}</p>{% endif %}
             </div>
             <div class="header-actions">
                 <div class="menu-wrap">
@@ -33,6 +34,7 @@
                         <a href="{{ url_for('index') }}">✅ All Tasks</a>
                         <a href="{{ url_for('history') }}">📜 History</a>
                         <a href="{{ url_for('due') }}">⏰ Due Tasks{% if due_count %} ({{ due_count }}){% endif %}</a>
+                        <a href="{{ url_for('logout') }}">🚪 Logout</a>
                     </div>
                 </div>
                 <button class="theme-btn" id="themeBtn" type="button" title="Switch theme">🌙</button>
